@@ -1,0 +1,9 @@
+nbproject
+nbproject/*
+*~
+*.swp
+README.rst
+*/cache/*
+*/logs/*
+web/uploads/*
+web/bundles/*
