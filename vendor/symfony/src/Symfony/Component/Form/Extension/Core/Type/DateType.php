@@ -14,7 +14,6 @@ namespace Symfony\Component\Form\Extension\Core\Type;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormBuilder;
-use Symfony\Component\Form\Exception\FormException;
 use Symfony\Component\Form\Extension\Core\ChoiceList\PaddedChoiceList;
 use Symfony\Component\Form\Extension\Core\ChoiceList\MonthChoiceList;
 use Symfony\Component\Form\FormView;
@@ -26,6 +25,9 @@ use Symfony\Component\Form\ReversedTransformer;
 
 class DateType extends AbstractType
 {
+    /**
+     * {@inheritdoc}
+     */
     public function buildForm(FormBuilder $builder, array $options)
     {
         $formatter = new \IntlDateFormatter(
@@ -35,7 +37,7 @@ class DateType extends AbstractType
             \DateTimeZone::UTC
         );
 
-        if ($options['widget'] === 'single-text') {
+        if ($options['widget'] === 'single_text') {
             $builder->appendClientTransformer(new DateTimeToLocalizedStringTransformer($options['data_timezone'], $options['user_timezone'], $options['format'], \IntlDateFormatter::NONE));
         } else {
             $yearOptions = $monthOptions = $dayOptions = array();
@@ -80,8 +82,6 @@ class DateType extends AbstractType
             $builder->appendNormTransformer(new ReversedTransformer(
                 new DateTimeToArrayTransformer($options['data_timezone'], $options['data_timezone'], array('year', 'month', 'day'))
             ));
-        } else if ($options['input'] !== 'datetime') {
-            throw new FormException('The "input" option must be "datetime", "string", "timestamp" or "array".');
         }
 
         $builder
@@ -90,6 +90,9 @@ class DateType extends AbstractType
         ;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function buildViewBottomUp(FormView $view, FormInterface $form)
     {
         $view->set('widget', $form->getAttribute('widget'));
@@ -111,6 +114,9 @@ class DateType extends AbstractType
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getDefaultOptions(array $options)
     {
         return array(
@@ -128,6 +134,9 @@ class DateType extends AbstractType
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAllowedOptionValues(array $options)
     {
         return array(
@@ -138,7 +147,7 @@ class DateType extends AbstractType
                 'array',
             ),
             'widget'    => array(
-                'single-text',
+                'single_text',
                 'text',
                 'choice',
             ),
@@ -151,11 +160,17 @@ class DateType extends AbstractType
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getParent(array $options)
     {
-        return $options['widget'] === 'single-text' ? 'field' : 'form';
+        return $options['widget'] === 'single_text' ? 'field' : 'form';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getName()
     {
         return 'date';

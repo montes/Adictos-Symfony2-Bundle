@@ -23,7 +23,7 @@ use Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use Symfony\Component\Security\Core\Exception\InsufficientAuthenticationException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
-use Symfony\Component\HttpKernel\Events;
+use Symfony\Component\HttpKernel\CoreEvents;
 use Symfony\Component\HttpKernel\Event\GetResponseForExceptionEvent;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
@@ -59,7 +59,7 @@ class ExceptionListener
      */
     public function register(EventDispatcherInterface $dispatcher)
     {
-        $dispatcher->addListener(Events::onCoreException, $this);
+        $dispatcher->addListener(CoreEvents::EXCEPTION, array($this, 'onCoreException'));
     }
 
     /**
@@ -88,7 +88,7 @@ class ExceptionListener
             $token = $this->context->getToken();
             if (!$this->authenticationTrustResolver->isFullFledged($token)) {
                 if (null !== $this->logger) {
-                    $this->logger->info('Access denied (user is not fully authenticated); redirecting to authentication entry point');
+                    $this->logger->debug('Access denied (user is not fully authenticated); redirecting to authentication entry point');
                 }
 
                 try {
@@ -100,7 +100,7 @@ class ExceptionListener
                 }
             } else {
                 if (null !== $this->logger) {
-                    $this->logger->info('Access is denied (and user is neither anonymous, nor remember-me)');
+                    $this->logger->debug('Access is denied (and user is neither anonymous, nor remember-me)');
                 }
 
                 try {
@@ -115,7 +115,7 @@ class ExceptionListener
                             return;
                         }
 
-                        $subRequest = Request::create($this->errorPage);
+                        $subRequest = Request::create($this->errorPage, 'get', array(), $request->cookies->all(), array(), $request->server->all());
                         $subRequest->attributes->set(SecurityContextInterface::ACCESS_DENIED_ERROR, $exception);
 
                         $response = $event->getKernel()->handle($subRequest, HttpKernelInterface::SUB_REQUEST, true);
@@ -140,8 +140,6 @@ class ExceptionListener
 
     private function startAuthentication(Request $request, AuthenticationException $authException)
     {
-        $this->context->setToken(null);
-
         if (null === $this->authenticationEntryPoint) {
             throw $authException;
         }

@@ -13,6 +13,7 @@ namespace Assetic\Filter;
 
 use Assetic\Asset\AssetInterface;
 use Assetic\Asset\FileAsset;
+use Assetic\Asset\HttpAsset;
 
 /**
  * Inlines imported stylesheets.
@@ -21,20 +22,25 @@ use Assetic\Asset\FileAsset;
  */
 class CssImportFilter extends BaseCssFilter
 {
-    private $rewriteFilter;
+    private $importFilter;
 
-    public function __construct(FilterInterface $rewriteFilter = null)
+    /**
+     * Constructor.
+     *
+     * @param FilterInterface $importFilter Filter for each imported asset
+     */
+    public function __construct(FilterInterface $importFilter = null)
     {
-        $this->rewriteFilter = $rewriteFilter ?: new CssRewriteFilter();
+        $this->importFilter = $importFilter ?: new CssRewriteFilter();
     }
 
     public function filterLoad(AssetInterface $asset)
     {
-        $rewriteFilter = $this->rewriteFilter;
+        $importFilter = $this->importFilter;
         $sourceRoot = $asset->getSourceRoot();
         $sourcePath = $asset->getSourcePath();
 
-        $callback = function($matches) use($rewriteFilter, $sourceRoot, $sourcePath)
+        $callback = function($matches) use($importFilter, $sourceRoot, $sourcePath)
         {
             if (!$matches['url']) {
                 return $matches[0];
@@ -68,13 +74,21 @@ class CssImportFilter extends BaseCssFilter
                 return $matches[0];
             }
 
-            $importSource = $importRoot.'/'.$importPath;
-
-            if (false === strpos($importSource, '://') && 0 !== strpos($importSource, '//') && !file_exists($importSource)) {
+            // ignore other imports
+            if ('css' != pathinfo($importPath, PATHINFO_EXTENSION)) {
                 return $matches[0];
             }
 
-            $import = new FileAsset($importSource, array($rewriteFilter), $importRoot, $importPath);
+            $importSource = $importRoot.'/'.$importPath;
+            if (false !== strpos($importSource, '://') || 0 === strpos($importSource, '//')) {
+                $import = new HttpAsset($importSource, array($importFilter), true);
+            } elseif (!file_exists($importSource)) {
+                // ignore not found imports
+                return $matches[0];
+            } else {
+                $import = new FileAsset($importSource, array($importFilter), $importRoot, $importPath);
+            }
+
             $import->setTargetPath($sourcePath);
 
             return $import->dump();

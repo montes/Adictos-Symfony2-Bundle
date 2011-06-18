@@ -11,7 +11,9 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-class Max extends \Symfony\Component\Validator\Constraint
+use Symfony\Component\Validator\Constraint;
+
+class Max extends Constraint
 {
     public $message = 'This value should be {{ limit }} or less';
     public $limit;
@@ -30,13 +32,5 @@ class Max extends \Symfony\Component\Validator\Constraint
     public function getRequiredOptions()
     {
         return array('limit');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::PROPERTY_CONSTRAINT;
     }
 }

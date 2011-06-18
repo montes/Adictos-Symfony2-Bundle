@@ -11,7 +11,7 @@
 
 namespace Symfony\Component\Form\Extension\Core\EventListener;
 
-use Symfony\Component\Form\Events;
+use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\Event\DataEvent;
 use Symfony\Component\Form\Event\FilterDataEvent;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -61,12 +61,12 @@ class ResizeFormListener implements EventSubscriberInterface
         $this->options = $options;
     }
 
-    public static function getSubscribedEvents()
+    static public function getSubscribedEvents()
     {
         return array(
-            Events::preSetData,
-            Events::preBind,
-            Events::onBindNormData,
+            FormEvents::PRE_SET_DATA => 'preSetData',
+            FormEvents::PRE_BIND => 'preBind',
+            FormEvents::BIND_NORM_DATA => 'onBindNormData',
         );
     }
 
@@ -83,11 +83,9 @@ class ResizeFormListener implements EventSubscriberInterface
             throw new UnexpectedTypeException($data, 'array or \Traversable');
         }
 
-        // First remove all rows except for the prototype row
+        // First remove all rows
         foreach ($form as $name => $child) {
-            if (!($this->allowAdd && '$$name$$' === $name)) {
-                $form->remove($name);
-            }
+            $form->remove($name);
         }
 
         // Then add all rows again in the correct order
@@ -111,10 +109,10 @@ class ResizeFormListener implements EventSubscriberInterface
             throw new UnexpectedTypeException($data, 'array or \Traversable');
         }
 
-        // Remove all empty rows except for the prototype row
+        // Remove all empty rows
         if ($this->allowDelete) {
             foreach ($form as $name => $child) {
-                if (!isset($data[$name]) && '$$name$$' !== $name) {
+                if (!isset($data[$name])) {
                     $form->remove($name);
                 }
             }

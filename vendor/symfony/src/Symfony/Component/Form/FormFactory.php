@@ -178,7 +178,6 @@ class FormFactory implements FormFactoryInterface
      * Returns a form builder
      *
      * @param string|FormTypeInterface  $type       The type of the form
-     * @param string                    $name       The name of the form
      * @param mixed                     $data       The initial data
      * @param array                     $options    The options
      *
@@ -270,6 +269,7 @@ class FormFactory implements FormFactoryInterface
         }
 
         $builder->setTypes($types);
+        $builder->setCurrentLoadingType($type->getName());
 
         foreach ($types as $type) {
             $type->buildForm($builder, $options);
@@ -278,6 +278,7 @@ class FormFactory implements FormFactoryInterface
                 $typeExtension->buildForm($builder, $options);
             }
         }
+        $builder->setCurrentLoadingType(null);
 
         return $builder;
     }

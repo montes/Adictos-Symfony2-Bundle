@@ -11,7 +11,9 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-class Collection extends \Symfony\Component\Validator\Constraint
+use Symfony\Component\Validator\Constraint;
+
+class Collection extends Constraint
 {
     public $fields;
     public $allowExtraFields = false;
@@ -36,13 +38,5 @@ class Collection extends \Symfony\Component\Validator\Constraint
     public function getRequiredOptions()
     {
         return array('fields');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::PROPERTY_CONSTRAINT;
     }
 }

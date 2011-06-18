@@ -11,16 +11,10 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-class Url extends \Symfony\Component\Validator\Constraint
+use Symfony\Component\Validator\Constraint;
+
+class Url extends Constraint
 {
     public $message = 'This value is not a valid URL';
     public $protocols = array('http', 'https');
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::PROPERTY_CONSTRAINT;
-    }
 }

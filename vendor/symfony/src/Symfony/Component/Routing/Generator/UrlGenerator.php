@@ -22,6 +22,8 @@ use Symfony\Component\Routing\Exception\MissingMandatoryParametersException;
  * UrlGenerator generates URL based on a set of routes.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @api
  */
 class UrlGenerator implements UrlGeneratorInterface
 {
@@ -35,6 +37,8 @@ class UrlGenerator implements UrlGeneratorInterface
      *
      * @param RouteCollection $routes  A RouteCollection instance
      * @param RequestContext  $context The context
+     *
+     * @api
      */
     public function __construct(RouteCollection $routes, RequestContext $context)
     {
@@ -47,6 +51,8 @@ class UrlGenerator implements UrlGeneratorInterface
      * Sets the request context.
      *
      * @param RequestContext $context The context
+     *
+     * @api
      */
     public function setContext(RequestContext $context)
     {
@@ -73,6 +79,8 @@ class UrlGenerator implements UrlGeneratorInterface
      * @return string The generated URL
      *
      * @throws Symfony\Component\Routing\Exception\RouteNotFoundException When route doesn't exist
+     *
+     * @api
      */
     public function generate($name, array $parameters = array(), $absolute = false)
     {
@@ -101,14 +109,14 @@ class UrlGenerator implements UrlGeneratorInterface
 
         // all params must be given
         if ($diff = array_diff_key($variables, $tparams)) {
-            throw new MissingMandatoryParametersException(sprintf('The "%s" route has some missing mandatory parameters (%s).', $name, implode(', ', $diff)));
+            throw new MissingMandatoryParametersException(sprintf('The "%s" route has some missing mandatory parameters ("%s").', $name, implode('", "', array_keys($diff))));
         }
 
         $url = '';
         $optional = true;
         foreach ($tokens as $token) {
             if ('variable' === $token[0]) {
-                if (false === $optional || !isset($defaults[$token[3]]) || (isset($parameters[$token[3]]) && $parameters[$token[3]] != $defaults[$token[3]])) {
+                if (false === $optional || !array_key_exists($token[3], $defaults) || (isset($parameters[$token[3]]) && $parameters[$token[3]] != $defaults[$token[3]])) {
                     if (!$isEmpty = in_array($tparams[$token[3]], array(null, '', false), true)) {
                         // check requirement
                         if ($tparams[$token[3]] && !preg_match('#^'.$token[2].'$#', $tparams[$token[3]])) {

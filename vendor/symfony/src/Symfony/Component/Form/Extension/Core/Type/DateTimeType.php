@@ -22,6 +22,9 @@ use Symfony\Component\Form\Extension\Core\DataTransformer\ArrayToPartsTransforme
 
 class DateTimeType extends AbstractType
 {
+    /**
+     * {@inheritdoc}
+     */
     public function buildForm(FormBuilder $builder, array $options)
     {
         // Only pass a subset of the options to children
@@ -87,6 +90,9 @@ class DateTimeType extends AbstractType
         }
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getDefaultOptions(array $options)
     {
         return array(
@@ -112,6 +118,9 @@ class DateTimeType extends AbstractType
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getAllowedOptionValues(array $options)
     {
         return array(
@@ -123,7 +132,7 @@ class DateTimeType extends AbstractType
             ),
             'date_widget'   => array(
                 null, // inherit default from DateType
-                'single-text',
+                'single_text',
                 'text',
                 'choice',
             ),
@@ -142,6 +151,9 @@ class DateTimeType extends AbstractType
         );
     }
 
+    /**
+     * {@inheritdoc}
+     */
     public function getName()
     {
         return 'datetime';

@@ -378,11 +378,11 @@ class Form implements \IteratorAggregate, FormInterface
     public function setData($appData)
     {
         $event = new DataEvent($this, $appData);
-        $this->dispatcher->dispatch(Events::preSetData, $event);
+        $this->dispatcher->dispatch(FormEvents::PRE_SET_DATA, $event);
 
         // Hook to change content of the data
         $event = new FilterDataEvent($this, $appData);
-        $this->dispatcher->dispatch(Events::onSetData, $event);
+        $this->dispatcher->dispatch(FormEvents::SET_DATA, $event);
         $appData = $event->getData();
 
         // Treat data as strings unless a value transformer exists
@@ -405,7 +405,7 @@ class Form implements \IteratorAggregate, FormInterface
         }
 
         $event = new DataEvent($this, $appData);
-        $this->dispatcher->dispatch(Events::postSetData, $event);
+        $this->dispatcher->dispatch(FormEvents::POST_SET_DATA, $event);
 
         return $this;
     }
@@ -466,7 +466,7 @@ class Form implements \IteratorAggregate, FormInterface
         $this->errors = array();
 
         $event = new DataEvent($this, $clientData);
-        $this->dispatcher->dispatch(Events::preBind, $event);
+        $this->dispatcher->dispatch(FormEvents::PRE_BIND, $event);
 
         $appData = null;
         $normData = null;
@@ -475,7 +475,7 @@ class Form implements \IteratorAggregate, FormInterface
 
         // Hook to change content of the data bound by the browser
         $event = new FilterDataEvent($this, $clientData);
-        $this->dispatcher->dispatch(Events::onBindClientData, $event);
+        $this->dispatcher->dispatch(FormEvents::BIND_CLIENT_DATA, $event);
         $clientData = $event->getData();
 
         if (count($this->children) > 0) {
@@ -532,7 +532,7 @@ class Form implements \IteratorAggregate, FormInterface
             // Hook to change content of the data in the normalized
             // representation
             $event = new FilterDataEvent($this, $normData);
-            $this->dispatcher->dispatch(Events::onBindNormData, $event);
+            $this->dispatcher->dispatch(FormEvents::BIND_NORM_DATA, $event);
             $normData = $event->getData();
 
             // Synchronize representations - must not change the content!
@@ -548,7 +548,7 @@ class Form implements \IteratorAggregate, FormInterface
         $this->synchronized = $synchronized;
 
         $event = new DataEvent($this, $clientData);
-        $this->dispatcher->dispatch(Events::postBind, $event);
+        $this->dispatcher->dispatch(FormEvents::POST_BIND, $event);
 
         foreach ($this->validators as $validator) {
             $validator->validate($this);
@@ -679,10 +679,12 @@ class Form implements \IteratorAggregate, FormInterface
             return false;
         }
 
-        foreach ($this->children as $child) {
-            if (!$child->isValid()) {
+        if (!$this->readOnly) {
+            foreach ($this->children as $child) {
+                if (!$child->isValid()) {
 
-                return false;
+                    return false;
+                }
             }
         }
 
@@ -905,7 +907,6 @@ class Form implements \IteratorAggregate, FormInterface
         $view->setParent($parent);
 
         $types = (array) $this->types;
-        $childViews = array();
 
         foreach ($types as $type) {
             $type->buildView($view, $this);
@@ -915,8 +916,20 @@ class Form implements \IteratorAggregate, FormInterface
             }
         }
 
+        $childViews = array();
+
         foreach ($this->children as $key => $child) {
             $childViews[$key] = $child->createView($view);
+        }
+
+        if (null !== $prototype = $view->get('prototype')) {
+            $protoView = $prototype->getForm()->createView($view);
+            $protoTypes = $protoView->get('types');
+            $protoTypes[] = 'prototype';
+            $childViews[$prototype->getName()] = $protoView
+                ->set('types', $protoTypes)
+                ->set('proto_id', $view->get('id').'_prototype');
+            ;
         }
 
         $view->setChildren($childViews);

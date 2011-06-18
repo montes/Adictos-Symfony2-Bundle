@@ -11,15 +11,9 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-class Language extends \Symfony\Component\Validator\Constraint
+use Symfony\Component\Validator\Constraint;
+
+class Language extends Constraint
 {
     public $message = 'This value is not a valid language';
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::PROPERTY_CONSTRAINT;
-    }
 }

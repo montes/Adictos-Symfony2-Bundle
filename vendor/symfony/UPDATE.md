@@ -6,6 +6,226 @@ one. It only discusses changes that need to be done when using the "public"
 API of the framework. If you "hack" the core, you should probably follow the
 timeline closely anyway.
 
+beta4 to beta5
+--------------
+
+* `UserProviderInterface::loadUser()` has been renamed to
+  `UserProviderInterface::refreshUser()` to make the goal of the method
+  clearer.
+
+* The `$kernel` property on `WebTestCase` is now static. Change any instances
+  of `$this->kernel` in your functional tests to `self::$kernel`.
+
+* The AsseticBundle has been moved to its own repository (it still bundled
+  with Symfony SE).
+
+* Yaml Component:
+
+    * Exception classes have been moved to their own namespace
+    * `Yaml::load()` has been renamed to `Yaml::parse()`
+
+* The File classes from `HttpFoundation` have been refactored:
+
+    * `Symfony\Component\HttpFoundation\File\File` has a new API:
+
+       * It now extends `\splFileInfo`:
+
+           * former `getName()` equivalent is `getBasename()`,
+           * former `getDirectory()` equivalent is `getPath()`,
+           * former `getPath()` equivalent is `getRealPath()`.
+
+       * the `move()` method now creates the target directory when it does not exist,
+
+       * `getExtension()` and `guessExtension()` do not return the extension
+          with a leading `.` anymore
+
+    * `Symfony\Component\HttpFoundation\File\UploadedFile` has a new API:
+
+        * The constructor has a new Boolean parameter that must be set to true
+          in test mode only in order to be able to move the file. This parameter
+          is not intended to be set to true from outside of the core files.
+
+        * `getMimeType()` now always returns the mime type of the underlying file.
+           Use `getClientMimeType()` to get the mime type from the request.
+
+        * `getSize()` now always returns the size of the underlying file.
+           Use `getClientSize()` to get the file size from the request.
+
+        * Use `getClientOriginalName()` to retrieve the original name from the
+          request.
+
+* The `extensions` setting for Twig has been removed. There is now only one
+  way to register Twig extensions, via the `twig.extension` tag.
+
+* The stack of Monolog handlers now bubbles the records by default. To stop
+  the propagation you need to configure the bubbling explicitly.
+
+* Expanded the SerializerInterface, while reducing the number of public
+  methods in the Serializer class itself breaking BC and adding component
+  specific Exception classes.
+
+* The FileType Form class has been heavily changed:
+
+    * The temporary storage has been removed.
+
+    * The file type `type` option has also been removed (the new behavior is
+      the same as when the `type` was set to `file` before).
+
+    * The file input is now rendered as any other input field.
+
+* The `em` option of the Doctrine `EntityType` class now takes the entity
+  manager name instead of the EntityManager instance. If you don't pass this
+  option, the default Entity Manager will be used as before.
+
+* In the Console component: `Command::getFullname()` and
+  `Command::getNamespace()` have been removed (`Command::getName()` behavior
+  is now the same as the old `Command::getFullname()`).
+
+* Default Twig form templates have been moved to the Twig bridge. Here is how
+  you can reference them now from a template or in a configuration setting:
+
+    Before:
+
+        `TwigBundle:Form:div_layout.html.twig`
+
+    After:
+
+        `form_div_layout.html.twig`
+
+* All settings regarding the cache warmers have been removed.
+
+* `Response::isRedirected()` has been merged with `Response::isRedirect()`
+
+beta3 to beta4
+--------------
+
+* `Client::getProfiler` has been removed in favor of `Client::getProfile`,
+  which returns an instance of `Profile`.
+
+* Some `UniversalClassLoader` methods have been renamed:
+
+    * `registerPrefixFallback` to `registerPrefixFallbacks`
+    * `registerNamespaceFallback` to `registerNamespaceFallbacks`
+
+* The event system has been made more flexible. A listener can now be any
+  valid PHP callable.
+
+    * `EventDispatcher::addListener($eventName, $listener, $priority = 0)`:
+        * `$eventName` is the event name (cannot be an array anymore),
+        * `$listener` is a PHP callable.
+
+    * The events classes and constants have been renamed:
+
+        * Old class name `Symfony\Component\Form\Events` and constants:
+
+                Events::preBind = 'preBind'
+                Events::postBind = 'postBind'
+                Events::preSetData = 'preSetData'
+                Events::postSetData = 'postSetData'
+                Events::onBindClientData = 'onBindClientData'
+                Events::onBindNormData = 'onBindNormData'
+                Events::onSetData = 'onSetData'
+
+        * New class name `Symfony\Component\Form\FormEvents` and constants:
+
+                FormEvents::PRE_BIND = 'form.pre_bind'
+                FormEvents::POST_BIND = 'form.post_bind'
+                FormEvents::PRE_SET_DATA = 'form.pre_set_data'
+                FormEvents::POST_SET_DATA = 'form.post_set_data'
+                FormEvents::BIND_CLIENT_DATA = 'form.bind_client_data'
+                FormEvents::BIND_NORM_DATA = 'form.bind_norm_data'
+                FormEvents::SET_DATA = 'form.set_data'
+
+        * Old class name `Symfony\Component\HttpKernel\Events` and constants:
+
+                Events::onCoreRequest = 'onCoreRequest'
+                Events::onCoreException = 'onCoreException'
+                Events::onCoreView = 'onCoreView'
+                Events::onCoreController = 'onCoreController'
+                Events::onCoreResponse = 'onCoreResponse'
+
+        * New class name `Symfony\Component\HttpKernel\CoreEvents` and constants:
+
+                CoreEvents::REQUEST = 'core.request'
+                CoreEvents::EXCEPTION = 'core.exception'
+                CoreEvents::VIEW = 'core.view'
+                CoreEvents::CONTROLLER = 'core.controller'
+                CoreEvents::RESPONSE = 'core.response'
+
+        * Old class name `Symfony\Component\Security\Http\Events` and constants:
+
+                Events::onSecurityInteractiveLogin = 'onSecurityInteractiveLogin'
+                Events::onSecuritySwitchUser = 'onSecuritySwitchUser'
+
+        * New class name `Symfony\Component\Security\Http\SecurityEvents` and constants:
+
+                SecurityEvents::INTERACTIVE_LOGIN = 'security.interactive_login'
+                SecurityEvents::SWITCH_USER = 'security.switch_user'
+
+    * `addListenerService` now only takes a single event name as its first
+      argument,
+
+    * Tags in configuration must now set the method to call:
+
+        * Before:
+
+                <tag name="kernel.listener" event="onCoreRequest" />
+
+        * After:
+
+                <tag name="kernel.listener" event="core.request" method="onCoreRequest" />
+
+    * Subscribers must now always return a hash:
+
+        * Before:
+
+                public static function getSubscribedEvents()
+                {
+                    return Events::onBindNormData;
+                }
+
+        * After:
+
+                public static function getSubscribedEvents()
+                {
+                    return array(FormEvents::BIND_NORM_DATA => 'onBindNormData');
+                }
+
+* Form `DateType` parameter `single-text` changed to `single_text`
+* Form field label helpers now accepts setting attributes, i.e.:
+
+```html+jinja
+{{ form_label(form.name, 'Custom label', { 'attr': {'class': 'name_field'} }) }}
+```
+
+* In order to use Swiftmailer, you should now register its "init.php" file via
+  the autoloader ("app/autoloader.php") and remove the `Swift_` prefix from
+  the autoloader. For an example on how this should be done, see the Standard
+  Distribution
+  [autoload.php](https://github.com/symfony/symfony-standard/blob/v2.0.0BETA4/app/autoload.php#L29).
+
+beta2 to beta3
+--------------
+
+* The settings under `framework.annotations` have changed slightly:
+
+    Before:
+
+        framework:
+            annotations:
+                cache: file
+                file_cache:
+                    debug: true
+                    dir: /foo
+
+    After:
+
+        framework:
+            annotations:
+                cache: file
+                debug: true
+                file_cache_dir: /foo
+
 beta1 to beta2
 --------------
 
@@ -15,117 +235,147 @@ beta1 to beta2
 
   Before:
 
-    /**
-     * @orm:Entity
-     */
-    class MyUser
-    {
-        /**
-         * @orm:Id
-         * @orm:GeneratedValue(strategy = "AUTO")
-         * @orm:Column(type="integer")
-         * @var integer
-         */
-        private $id;
-        
-        /**
-         * @orm:Column(type="string", nullable=false)
-         * @assert:NotBlank
-         * @var string
-         */
-        private $name;
-    }
+``` php
+<?php
 
+/**
+ * @orm:Entity
+ */
+class AcmeUser
+{
+    /**
+     * @orm:Id
+     * @orm:GeneratedValue(strategy = "AUTO")
+     * @orm:Column(type="integer")
+     * @var integer
+     */
+    private $id;
+
+    /**
+     * @orm:Column(type="string", nullable=false)
+     * @assert:NotBlank
+     * @var string
+     */
+    private $name;
+}
+```
   After:
 
-    use Doctrine\ORM\Mapping as ORM;
-    use Symfony\Component\Validator\Constraints as Assert;
+``` php
+<?php
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ */
+class AcmeUser
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @ORM\Column(type="integer")
+     *
+     * @var integer
+     */
+    private $id;
 
     /**
-     * @ORM\Entity
+     * @ORM\Column(type="string", nullable=false)
+     * @Assert\NotBlank
+     *
+     * @var string
      */
-    class MyUser
-    {
-        /**
-         * @ORM\Id
-         * @ORM\GeneratedValue(strategy="AUTO")
-         * @ORM\Column(type="integer")
-         *
-         * @var integer
-         */
-        private $id;
+    private $name;
+}
+```
 
-        /**
-         * @ORM\Column(type="string", nullable=false)
-         * @Assert\NotBlank
-         *
-         * @var string
-         */
-        private $name;
-    }
+* The `Set` constraint has been removed as it is not required anymore.
 
-* The config under "framework.validation.annotations" has been removed and was 
-  replaced with a boolean flag "framework.validation.enable_annotations" which
-  defaults to false.
+Before:
 
-* The Set constraint has been removed as it is not required anymore.
+``` php
+<?php
 
-  Before:
-  
+/**
+ * @orm:Entity
+ */
+class AcmeEntity
+{
     /**
      * @assert:Set({@assert:Callback(...), @assert:Callback(...)})
      */
     private $foo;
+}
+```
+After:
 
-  After:
+``` php
+<?php
 
-    use Symfony\Component\Validator\Constraints\Callback;
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints\Callback;
 
+/**
+ * @ORM\Entity
+ */
+class AcmeEntity
+{
     /**
      * @Callback(...)
      * @Callback(...)
      */
-    private  $foo;
+    private $foo;
+}
+```
+
+* The config under `framework.validation.annotations` has been removed and was
+  replaced with a boolean flag `framework.validation.enable_annotations` which
+  defaults to false.
 
 * Forms must now be explicitly enabled (automatically done in Symfony SE):
 
-        form: ~
+        framework:
+            form: ~
 
-        # equivalent to
-        form:
-            enabled: true
+    Which is equivalent to:
+
+        framework:
+            form:
+                enabled: true
 
 * The Routing Exceptions have been moved:
 
-  Before:
+    Before:
 
         Symfony\Component\Routing\Matcher\Exception\Exception
         Symfony\Component\Routing\Matcher\Exception\NotFoundException
         Symfony\Component\Routing\Matcher\Exception\MethodNotAllowedException
 
-  After:
+    After:
 
         Symfony\Component\Routing\Exception\Exception
         Symfony\Component\Routing\Exception\NotFoundException
         Symfony\Component\Routing\Exception\MethodNotAllowedException
 
-* The form component's ``csrf_page_id`` option has been renamed to
-  ``intention``.
+* The form component's `csrf_page_id` option has been renamed to
+  `intention`.
 
-* The ``error_handler`` setting has been removed. The ``ErrorHandler`` class
-  is now managed directly by Symfony SE in ``AppKernel``.
+* The `error_handler` setting has been removed. The `ErrorHandler` class
+  is now managed directly by Symfony SE in `AppKernel`.
 
 * The Doctrine metadata files has moved from
-  ``Resources/config/doctrine/metadata/orm/`` to ``Resources/config/doctrine``,
-  the extension from ``.dcm.yml`` to ``.orm.yml``, and the file name has been
+  `Resources/config/doctrine/metadata/orm/` to `Resources/config/doctrine`,
+  the extension from `.dcm.yml` to `.orm.yml`, and the file name has been
   changed to the short class name.
 
-  Before:
+    Before:
 
         Resources/config/doctrine/metadata/orm/Bundle.Entity.dcm.xml
         Resources/config/doctrine/metadata/orm/Bundle.Entity.dcm.yml
 
-  After:
+    After:
 
         Resources/config/doctrine/Entity.orm.xml
         Resources/config/doctrine/Entity.orm.yml
@@ -134,31 +384,31 @@ beta1 to beta2
   parameters have been removed (replaced by methods on the `doctrine`
   service):
 
-   * doctrine.orm.entity_managers
-   * doctrine.orm.default_entity_manager
-   * doctrine.dbal.default_connection
+   * `doctrine.orm.entity_managers`
+   * `doctrine.orm.default_entity_manager`
+   * `doctrine.dbal.default_connection`
 
-  Before:
+    Before:
 
         $container->getParameter('doctrine.orm.entity_managers')
         $container->getParameter('doctrine.orm.default_entity_manager')
         $container->getParameter('doctrine.orm.default_connection')
 
-  After:
+    After:
 
         $container->get('doctrine')->getEntityManagerNames()
         $container->get('doctrine')->getDefaultEntityManagerName()
         $container->get('doctrine')->getDefaultConnectionName()
 
-  But you don't really need to use these methods anymore, as to get an entity
-  manager, you can now use the registry directly:
+    But you don't really need to use these methods anymore, as to get an entity
+    manager, you can now use the registry directly:
 
-  Before:
+    Before:
 
         $em = $this->get('doctrine.orm.entity_manager');
         $em = $this->get('doctrine.orm.foobar_entity_manager');
 
-  After:
+    After:
 
         $em = $this->get('doctrine')->getEntityManager();
         $em = $this->get('doctrine')->getEntityManager('foobar');
@@ -204,51 +454,51 @@ beta1 to beta2
 
     Before:
 
-      app/translations/catalogue.fr.xml
+        app/translations/catalogue.fr.xml
 
     After:
 
-      app/Resources/translations/catalogue.fr.xml
+        app/Resources/translations/catalogue.fr.xml
 
-* The option "modifiable" of the "collection" form type was split into two
-  options "allow_add" and "allow_delete".
+* The option `modifiable` of the `collection` form type was split into two
+  options `allow_add` and `allow_delete`.
 
     Before:
 
-      $builder->add('tags', 'collection', array(
-          'type' => 'text',
-          'modifiable' => true,
-      ));
+        $builder->add('tags', 'collection', array(
+            'type' => 'text',
+            'modifiable' => true,
+        ));
 
     After:
 
-      $builder->add('tags', 'collection', array(
-          'type' => 'text',
-          'allow_add' => true,
-          'allow_delete' => true,
-      ));
-      
-* Request::hasSession() has been renamed to Request::hasPreviousSession(). The
-  method hasSession() still exists, but only checks if the request contains a
+        $builder->add('tags', 'collection', array(
+            'type' => 'text',
+            'allow_add' => true,
+            'allow_delete' => true,
+        ));
+
+* `Request::hasSession()` has been renamed to `Request::hasPreviousSession()`. The
+  method `hasSession()` still exists, but only checks if the request contains a
   session object, not if the session was started in a previous request.
 
 * Serializer: The NormalizerInterface's `supports()` method has been split in
-  two methods: `supportsNormalization` and `supportsDenormalization`.
+  two methods: `supportsNormalization()` and `supportsDenormalization()`.
 
-* ParameterBag::getDeep() has been removed, and is replaced with a boolean flag
-  on the ParameterBag::get() method.
+* `ParameterBag::getDeep()` has been removed, and is replaced with a boolean flag
+  on the `ParameterBag::get()` method.
 
 * Serializer: `AbstractEncoder` & `AbstractNormalizer` were renamed to
   `SerializerAwareEncoder` & `SerializerAwareNormalizer`.
 
 * Serializer: The `$properties` argument has been dropped from all interfaces.
 
-* Form: Renamed option value "text" of "widget" option of the "date" type was 
-  renamed to "single-text". "text" indicates to use separate text boxes now
-  (like for the "time" type).
-  
-* Form: Renamed view variable "name" to "full_name". The variable "name" now
-  contains the local, short name (equivalent to $form->getName()).
+* Form: Renamed option value `text` of `widget` option of the `date` type was
+  renamed to `single-text`. `text` indicates to use separate text boxes now
+  (like for the `time` type).
+
+* Form: Renamed view variable `name` to `full_name`. The variable `name` now
+  contains the local, short name (equivalent to `$form->getName()`).
 
 PR12 to beta1
 -------------
@@ -291,27 +541,27 @@ PR12 to beta1
 
 * The `trans` tag does not accept a message as an argument anymore:
 
-    {% trans "foo" %}
-    {% trans foo %}
+        {% trans "foo" %}
+        {% trans foo %}
 
-  Use the long version the tags or the filter instead:
+    Use the long version the tags or the filter instead:
 
-    {% trans %}foo{% endtrans %}
-    {{ foo|trans }}
+        {% trans %}foo{% endtrans %}
+        {{ foo|trans }}
 
-  This has been done to clarify the usage of the tag and filter and also to
-  make it clearer when the automatic output escaping rules are applied (see
-  the doc for more information).
+    This has been done to clarify the usage of the tag and filter and also to
+    make it clearer when the automatic output escaping rules are applied (see
+    the doc for more information).
 
-* Some methods in the DependencyInjection component's ContainerBuilder and
-  Definition classes have been renamed to be more specific and consistent:
+* Some methods in the DependencyInjection component's `ContainerBuilder` and
+  `Definition` classes have been renamed to be more specific and consistent:
 
-  Before:
+    Before:
 
         $container->remove('my_definition');
         $definition->setArgument(0, 'foo');
 
-  After:
+    After:
 
         $container->removeDefinition('my_definition');
         $definition->replaceArgument(0, 'foo');
@@ -322,18 +572,18 @@ PR12 to beta1
 PR11 to PR12
 ------------
 
-* HttpFoundation\Cookie::getExpire() was renamed to getExpiresTime()
+* `HttpFoundation\Cookie::getExpire()` was renamed to `getExpiresTime()`
 
 * XML configurations have been normalized. All tags with only one attribute
   have been converted to tag content:
 
-  Before:
+    Before:
 
         <bundle name="MyBundle" />
         <app:engine id="twig" />
         <twig:extension id="twig.extension.debug" />
 
-  After:
+    After:
 
         <bundle>MyBundle</bundle>
         <app:engine>twig</app:engine>
@@ -356,7 +606,7 @@ PR10 to PR11
   that the BC is kept but implementing this interface in your extensions will
   allow for further developments.
 
-* The "fingerscrossed" Monolog option has been renamed to "fingers_crossed".
+* The `fingerscrossed` Monolog option has been renamed to `fingers_crossed`.
 
 PR9 to PR10
 -----------
@@ -454,11 +704,11 @@ PR8 to PR9
 
 * Assetic filters must be now explicitly loaded:
 
-    assetic:
-        filters:
-            cssrewrite: ~
-            yui_css:
-                jar: "/path/to/yuicompressor.jar"
-            my_filter:
-                resource: "%kernel.root_dir%/config/my_filter.xml"
-                foo:      bar
+        assetic:
+            filters:
+                cssrewrite: ~
+                yui_css:
+                    jar:      "/path/to/yuicompressor.jar"
+                my_filter:
+                    resource: "%kernel.root_dir%/config/my_filter.xml"
+                    foo:      bar

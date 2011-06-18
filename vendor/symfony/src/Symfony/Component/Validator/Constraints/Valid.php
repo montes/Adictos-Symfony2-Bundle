@@ -11,17 +11,9 @@
 
 namespace Symfony\Component\Validator\Constraints;
 
-use Symfony\Component\Validator\Exception\ConstraintDefinitionException;
+use Symfony\Component\Validator\Constraint;
 
-class Valid extends \Symfony\Component\Validator\Constraint
+class Valid extends Constraint
 {
     public $traverse = true;
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getTargets()
-    {
-        return self::PROPERTY_CONSTRAINT;
-    }
 }
