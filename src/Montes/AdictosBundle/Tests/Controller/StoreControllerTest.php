@@ -12,4 +12,12 @@ class StoreControllerTest extends WebTestCase
         $this->assertTrue($crawler->filter('html:contains'.
             '("So you want store pepe?")')->count() > 0);
     }
+
+    public function testTotalStores()
+    {
+        $client = $this->createClient();
+        $crawler = $client->request('GET', '/adictos/');
+        $this->assertTrue($crawler->filter('html:contains'.
+            '("We have a total of")')->count() > 0);
+    }
 }
