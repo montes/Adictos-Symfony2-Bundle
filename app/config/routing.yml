@@ -1,0 +1,4 @@
+montes_adictos:
+    resource: "@MontesAdictosBundle/Resources/config/routing.yml"
+    prefix:   /
+

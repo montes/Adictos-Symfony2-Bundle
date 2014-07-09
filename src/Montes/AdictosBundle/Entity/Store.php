@@ -1,9 +1,10 @@
 <?php
-
+// Montes/AdictosBundle/Entity/Store.php
+ 
 namespace Montes\AdictosBundle\Entity;
-
+ 
 use Doctrine\ORM\Mapping as ORM;
-
+ 
 /**
  * @ORM\Entity
  */
@@ -15,7 +16,7 @@ class Store
      * @ORM\GeneratedValue(strategy="AUTO")
      */
      protected $id;
-
+ 
     /**
      * @ORM\ManyToMany(targetEntity="Category")
      * @ORM\JoinTable(name="stores_categories",
@@ -23,52 +24,52 @@ class Store
      *      inverseJoinColumns={@ORM\JoinColumn(name="category_id", referencedColumnName="id")})
      */
     protected $categories;
-
+ 
     /**
-     * @ORM\Column(type="string", length="255")
+     * @ORM\Column(type="string", length=255)
      */
     protected $url;
-
+ 
     /**
-     * @ORM\Column(type="string", length="255")
+     * @ORM\Column(type="string", length=255)
      */
     protected $name;
-
+ 
     /**
      * @ORM\Column(type="integer")
      */
     protected $clicks = 0;
-
+ 
     /**
      * @ORM\Column(type="boolean")
      */
     protected $validated = false;
-
+ 
     /**
      * @ORM\Column(type="integer")
      */
     protected $pcomments = 0;
-
+ 
     /**
      * @ORM\Column(type="integer")
      */
     protected $ncomments = 0;
-
+ 
     /**
      * @ORM\Column(type="boolean")
      */
     protected $active = false;
-
+ 
     /**
      * @ORM\Column(type="datetime", name="updated_at")
      */
     protected $updatedAt;
-
+ 
     /**
      * @ORM\Column(type="datetime", name="created_at")
      */
     protected $createdAt;
-
+ 
     public function __construct()
     {
         $this->categories = new \Doctrine\Common\Collections\ArrayCollection();
@@ -76,11 +77,10 @@ class Store
         $this->updatedAt = new \DateTime();
     }
 
-
     /**
      * Get id
      *
-     * @return integer $id
+     * @return integer 
      */
     public function getId()
     {
@@ -91,16 +91,19 @@ class Store
      * Set url
      *
      * @param string $url
+     * @return Store
      */
     public function setUrl($url)
     {
         $this->url = $url;
+
+        return $this;
     }
 
     /**
      * Get url
      *
-     * @return string $url
+     * @return string 
      */
     public function getUrl()
     {
@@ -111,16 +114,19 @@ class Store
      * Set name
      *
      * @param string $name
+     * @return Store
      */
     public function setName($name)
     {
         $this->name = $name;
+
+        return $this;
     }
 
     /**
      * Get name
      *
-     * @return string $name
+     * @return string 
      */
     public function getName()
     {
@@ -131,16 +137,19 @@ class Store
      * Set clicks
      *
      * @param integer $clicks
+     * @return Store
      */
     public function setClicks($clicks)
     {
         $this->clicks = $clicks;
+
+        return $this;
     }
 
     /**
      * Get clicks
      *
-     * @return integer $clicks
+     * @return integer 
      */
     public function getClicks()
     {
@@ -151,16 +160,19 @@ class Store
      * Set validated
      *
      * @param boolean $validated
+     * @return Store
      */
     public function setValidated($validated)
     {
         $this->validated = $validated;
+
+        return $this;
     }
 
     /**
      * Get validated
      *
-     * @return boolean $validated
+     * @return boolean 
      */
     public function getValidated()
     {
@@ -171,16 +183,19 @@ class Store
      * Set pcomments
      *
      * @param integer $pcomments
+     * @return Store
      */
     public function setPcomments($pcomments)
     {
         $this->pcomments = $pcomments;
+
+        return $this;
     }
 
     /**
      * Get pcomments
      *
-     * @return integer $pcomments
+     * @return integer 
      */
     public function getPcomments()
     {
@@ -191,16 +206,19 @@ class Store
      * Set ncomments
      *
      * @param integer $ncomments
+     * @return Store
      */
     public function setNcomments($ncomments)
     {
         $this->ncomments = $ncomments;
+
+        return $this;
     }
 
     /**
      * Get ncomments
      *
-     * @return integer $ncomments
+     * @return integer 
      */
     public function getNcomments()
     {
@@ -211,16 +229,19 @@ class Store
      * Set active
      *
      * @param boolean $active
+     * @return Store
      */
     public function setActive($active)
     {
         $this->active = $active;
+
+        return $this;
     }
 
     /**
      * Get active
      *
-     * @return boolean $active
+     * @return boolean 
      */
     public function getActive()
     {
@@ -230,17 +251,20 @@ class Store
     /**
      * Set updatedAt
      *
-     * @param datetime $updatedAt
+     * @param \DateTime $updatedAt
+     * @return Store
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
     }
 
     /**
      * Get updatedAt
      *
-     * @return datetime $updatedAt
+     * @return \DateTime 
      */
     public function getUpdatedAt()
     {
@@ -250,17 +274,20 @@ class Store
     /**
      * Set createdAt
      *
-     * @param datetime $createdAt
+     * @param \DateTime $createdAt
+     * @return Store
      */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
+
+        return $this;
     }
 
     /**
      * Get createdAt
      *
-     * @return datetime $createdAt
+     * @return \DateTime 
      */
     public function getCreatedAt()
     {
@@ -270,17 +297,30 @@ class Store
     /**
      * Add categories
      *
-     * @param Montes\AdictosBundle\Entity\Category $categories
+     * @param \Montes\AdictosBundle\Entity\Category $categories
+     * @return Store
      */
-    public function addCategories(\Montes\AdictosBundle\Entity\Category $categories)
+    public function addCategory(\Montes\AdictosBundle\Entity\Category $categories)
     {
         $this->categories[] = $categories;
+
+        return $this;
+    }
+
+    /**
+     * Remove categories
+     *
+     * @param \Montes\AdictosBundle\Entity\Category $categories
+     */
+    public function removeCategory(\Montes\AdictosBundle\Entity\Category $categories)
+    {
+        $this->categories->removeElement($categories);
     }
 
     /**
      * Get categories
      *
-     * @return Doctrine\Common\Collections\Collection $categories
+     * @return \Doctrine\Common\Collections\Collection 
      */
     public function getCategories()
     {

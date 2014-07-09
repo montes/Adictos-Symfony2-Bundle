@@ -1,0 +1,7 @@
+parameters:
+#    montes_adictos.example.class: Montes\AdictosBundle\Example
+
+services:
+#    montes_adictos.example:
+#        class: %montes_adictos.example.class%
+#        arguments: [@service_id, "plain_value", %parameter%]
